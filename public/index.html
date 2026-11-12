@@ -5,115 +5,470 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sandman DB — Visualizador do Banco de Dados</title>
 <style>
-  :root { --bg:#12100e; --card:#1d1916; --line:#3a322b; --txt:#e8e0d5; --dim:#a2968a; --accent:#e0a458; --green:#7fb069; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--txt); font-family: 'Segoe UI', system-ui, sans-serif; padding: 24px; }
-  h1 { font-size: 26px; margin-bottom: 4px; }
-  h1 span { color: var(--accent); }
-  .sub { color: var(--dim); margin-bottom: 24px; font-size: 14px; }
-  h2 { font-size: 18px; margin: 28px 0 12px; border-left: 4px solid var(--accent); padding-left: 10px; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .tab { background: var(--card); border: 1px solid var(--line); color: var(--txt); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-  .tab:hover { border-color: var(--accent); }
-  .tab.active { background: var(--accent); color: #17130f; border-color: var(--accent); font-weight: 600; }
-  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; font-size: 14px; }
-  th { background: #262019; color: var(--accent); text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
-  td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
-  tr:hover td { background: #241f1a; }
-  .count { color: var(--green); font-weight: 600; margin-bottom: 8px; font-size: 13px; }
-  .diagram { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
-  .entity { background: var(--card); border: 1px solid var(--line); border-radius: 10px; min-width: 190px; flex: 1; }
-  .entity h3 { background: #262019; color: var(--accent); font-size: 13px; padding: 8px 12px; border-radius: 9px 9px 0 0; font-family: monospace; }
-  .entity ul { list-style: none; padding: 8px 12px; }
-  .entity li { font-family: monospace; font-size: 12px; color: var(--dim); padding: 3px 0; }
-  .entity li b { color: var(--txt); font-weight: 600; }
-  .entity li .fk { color: #7ec8e3; }
-  .arrow { align-self: center; color: var(--dim); font-size: 12px; text-align: center; flex: 0 0 100%; }
-  .loading, .error { color: var(--dim); padding: 16px; font-style: italic; }
-  .error { color: #e07a5f; }
-  .footer { margin-top: 32px; color: var(--dim); font-size: 12px; border-top: 1px solid var(--line); padding-top: 12px; }
-  a { color: var(--accent); }
+  :root {
+    --bg:#0f0d0b; --panel:#171412; --card:#1c1815; --card2:#221d19;
+    --line:#322a24; --txt:#ece5db; --dim:#a69a8d; --accent:#e6a84f;
+    --green:#7fb069; --blue:#7ec8e3; --red:#e07a5f;
+    --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--txt); font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.5; }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  ::selection { background:var(--accent); color:#17130f; }
+
+  /* ── Topo ─────────────────────────────────────── */
+  .top { border-bottom:1px solid var(--line); background:linear-gradient(180deg,#191512,#12100e); }
+  .top-in { max-width:1400px; margin:0 auto; padding:22px 24px 18px; }
+  h1 { font-size:25px; letter-spacing:.2px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  h1 .brand { color:var(--accent); }
+  h1 .tag { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#17130f; background:var(--accent); padding:3px 9px; border-radius:20px; }
+  .sub { color:var(--dim); font-size:14px; margin-top:6px; }
+  .links { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .links a { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:7px 13px; border-radius:8px; font-size:13px; transition:.15s; }
+  .links a:hover { border-color:var(--accent); color:var(--accent); text-decoration:none; }
+  .links a.primary { background:var(--accent); border-color:var(--accent); color:#17130f; font-weight:600; }
+  .links a.primary:hover { filter:brightness(1.08); }
+
+  /* ── Barra de métricas ────────────────────────── */
+  .stats { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 14px; min-width:130px; }
+  .stat b { display:block; font-size:19px; color:var(--accent); }
+  .stat span { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; }
+
+  /* ── Ferramentas ──────────────────────────────── */
+  .tools { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center; }
+  .search { flex:1; min-width:220px; position:relative; }
+  .search input { width:100%; background:var(--card); border:1px solid var(--line); color:var(--txt); padding:10px 14px 10px 36px; border-radius:10px; font-size:14px; outline:none; }
+  .search input:focus { border-color:var(--accent); }
+  .search::before { content:"🔍"; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.7; }
+  .btn { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:10px 16px; border-radius:10px; cursor:pointer; font-size:14px; transition:.15s; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn.loading { opacity:.6; pointer-events:none; }
+  #searchInfo { font-size:12px; color:var(--dim); }
+
+  /* ── Layout ───────────────────────────────────── */
+  .wrap { max-width:1400px; margin:0 auto; padding:24px; display:grid; grid-template-columns:235px 1fr; gap:26px; align-items:start; }
+
+  /* Sidebar */
+  .side { position:sticky; top:16px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 12px; max-height:calc(100vh - 32px); overflow:auto; }
+  .side h3 { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--dim); margin-bottom:10px; padding:0 4px; }
+  .sgroup { margin-bottom:14px; }
+  .shead { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--accent); padding:5px 6px; border-bottom:1px dashed var(--line); margin-bottom:6px; }
+  .slink { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:6px 8px; border-radius:7px; font-size:13px; font-family:ui-monospace, Consolas, monospace; color:var(--txt); transition:.12s; }
+  .slink:hover { background:var(--card2); text-decoration:none; }
+  .slink.active { background:var(--accent); color:#17130f; font-weight:600; }
+  .pill { font-size:11px; font-family:'Segoe UI', sans-serif; background:#2a241e; color:var(--green); padding:1px 7px; border-radius:20px; border:1px solid var(--line); }
+  .slink.active .pill { background:#17130f22; border-color:#17130f44; color:#17130f; }
+
+  /* ── Categorias ───────────────────────────────── */
+  .cat { margin-bottom:34px; scroll-margin-top:16px; }
+  .cathead { display:flex; align-items:flex-start; gap:14px; padding-bottom:12px; border-bottom:2px solid var(--line); margin-bottom:16px; flex-wrap:wrap; }
+  .catico { font-size:24px; background:var(--card); border:1px solid var(--line); border-radius:10px; width:46px; height:46px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .cathead h2 { font-size:19px; }
+  .cathead p { color:var(--dim); font-size:13px; max-width:640px; }
+  .catstats { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { font-size:11px; background:var(--card); border:1px solid var(--line); color:var(--dim); padding:4px 10px; border-radius:20px; }
+  .chip b { color:var(--accent); }
+
+  .tgrid { display:flex; flex-direction:column; gap:16px; }
+
+  /* ── Card de tabela ───────────────────────────── */
+  .tcard { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; scroll-margin-top:16px; transition:.15s; }
+  .tcard:hover { border-color:#4a3f36; }
+  .tcard.found { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .tchead { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--card2); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tname { font-family:ui-monospace, Consolas, monospace; font-size:15px; font-weight:700; color:var(--accent); }
+  .ttitle { font-size:13px; color:var(--dim); }
+  .tmeta { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .badge { font-size:12px; background:#233026; color:var(--green); border:1px solid #34472f; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .badge.empty { background:#302323; color:var(--red); border-color:#4a3333; }
+  .badge.loading { background:#2a241e; color:var(--dim); border-color:var(--line); }
+  .jslink { font-size:12px; font-family:ui-monospace, Consolas, monospace; }
+  .tdesc { font-size:13px; color:var(--dim); padding:11px 16px 0; }
+  .trel { display:flex; flex-wrap:wrap; gap:6px; padding:10px 16px 0; }
+  .rel { font-size:11px; font-family:ui-monospace, Consolas, monospace; background:#1a2430; color:var(--blue); border:1px solid #2a3a4a; padding:3px 9px; border-radius:6px; }
+  .twrap { overflow-x:auto; padding:12px 16px 16px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  thead th { background:#262019; color:var(--accent); text-align:left; padding:9px 12px; font-size:11px; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  tbody td { padding:9px 12px; border-bottom:1px solid #29221d; vertical-align:top; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:nth-child(even) td { background:#1f1b17; }
+  tbody tr:hover td { background:#282219; }
+  td .kw { color:var(--dim); }
+  .num { color:var(--blue); font-family:ui-monospace, Consolas, monospace; }
+  .tag-chip { display:inline-block; background:#2a241e; border:1px solid var(--line); color:var(--accent); font-size:12px; padding:2px 9px; border-radius:20px; }
+  mark { background:var(--accent); color:#17130f; border-radius:3px; }
+
+  .empty { color:var(--dim); font-style:italic; font-size:13px; padding:14px 4px; }
+  .error { color:var(--red); font-size:13px; padding:14px 4px; }
+
+  /* ── Rodapé ───────────────────────────────────── */
+  .foot { border-top:1px solid var(--line); margin-top:10px; padding:18px 24px 30px; color:var(--dim); font-size:12.5px; text-align:center; }
+
+  /* ── Responsivo ───────────────────────────────── */
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns:1fr; padding:16px; gap:18px; }
+    .side { position:static; max-height:none; }
+    .catstats { margin-left:0; width:100%; }
+    h1 { font-size:21px; }
+  }
 </style>
 </head>
 <body>
-  <h1>🗄️ <span>Sandman</span> — Banco de Dados do Jogo</h1>
-  <div class="sub">Visualizador das tabelas do PostgreSQL hospedado no Render · API: <a href="/api" target="_blank">/api</a></div>
 
-  <h2>📐 Diagrama das tabelas</h2>
-  <div class="diagram">
-    <div class="entity"><h3>chapters</h3><ul>
-      <li><b>id</b> PK</li><li>numero (1–5)</li><li>titulo</li><li>sinopse</li><li>mecanica_nova</li></ul></div>
-    <div class="arrow">1 ──▶ N &nbsp;desbloqueia mechanics · tem checkpoints · tem memories</div>
-    <div class="entity"><h3>mechanics</h3><ul>
-      <li><b>id</b> PK</li><li>categoria</li><li>nome</li><li>descricao</li><li><span class="fk">desbloqueio_capitulo</span> FK</li></ul></div>
-    <div class="entity"><h3>checkpoints</h3><ul>
-      <li><b>id</b> PK</li><li>tipo</li><li>descricao</li><li><span class="fk">capitulo_id</span> FK</li></ul></div>
-    <div class="entity"><h3>memories</h3><ul>
-      <li><b>id</b> PK</li><li>nome</li><li>descricao</li><li><span class="fk">capitulo_id</span> FK</li></ul></div>
-    <div class="entity"><h3>characters</h3><ul>
-      <li><b>id</b> PK</li><li>nome</li><li>papel</li><li>descricao</li></ul></div>
-    <div class="entity"><h3>enemies</h3><ul>
-      <li><b>id</b> PK</li><li>nome</li><li>padrao</li><li>descricao</li></ul></div>
-    <div class="entity"><h3>difficulties</h3><ul>
-      <li><b>id</b> PK</li><li>nome</li><li>descricao</li></ul></div>
-    <div class="entity"><h3>controls</h3><ul>
-      <li><b>id</b> PK</li><li>acao</li><li>teclado</li><li>controle</li><li>ordem</li></ul></div>
-    <div class="entity"><h3>game_config</h3><ul>
-      <li><b>chave</b> PK</li><li>valor</li></ul></div>
+<div class="top">
+  <div class="top-in">
+    <h1>🗄️ <span class="brand">Sandman</span> — Banco de Dados do Jogo <span class="tag">PostgreSQL</span></h1>
+    <div class="sub">Todas as tabelas organizadas por categoria · hospedado no Render · dados extraídos do <code>PLANO-DO-JOGO.md</code></div>
+
+    <div class="links">
+      <a class="primary" href="https://github.com/eduardoosganascimento-beep/sandman-db" target="_blank">💻 GitHub</a>
+      <a href="https://github.com/eduardoosganascimento-beep/sandman-db/blob/main/docs/PLANO-BANCO.md" target="_blank">📐 Plano do banco</a>
+      <a href="/api" target="_blank">🔌 API (JSON)</a>
+      <a href="/health" target="_blank">💓 Health</a>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><b id="st-cats">–</b><span>Categorias</span></div>
+      <div class="stat"><b id="st-tables">–</b><span>Tabelas</span></div>
+      <div class="stat"><b id="st-rows">–</b><span>Registros</span></div>
+      <div class="stat"><b>PostgreSQL 18</b><span>Banco no Render (Oregon)</span></div>
+    </div>
+
+    <div class="tools">
+      <div class="search"><input id="search" type="search" placeholder="Buscar em todas as tabelas (nome, descrição, capítulo…)" autocomplete="off"></div>
+      <button class="btn" id="refresh">↻ Atualizar</button>
+      <span id="searchInfo"></span>
+    </div>
   </div>
+</div>
 
-  <h2>📋 Dados das tabelas</h2>
-  <div class="tabs" id="tabs"></div>
-  <div id="content"><div class="loading">Carregando…</div></div>
+<div class="wrap">
+  <aside class="side" id="side">
+    <h3>Categorias</h3>
+    <div id="nav"><!-- gerado --></div>
+  </aside>
 
-  <div class="footer">Projeto: <a href="https://github.com/eduardoosganascimento-beep/sandman-db" target="_blank">github.com/eduardoosganascimento-beep/sandman-db</a> · Plano do banco: <a href="https://github.com/eduardoosganascimento-beep/sandman-db/blob/main/docs/PLANO-BANCO.md" target="_blank">docs/PLANO-BANCO.md</a></div>
+  <main id="main">
+    <div class="loading" style="color:var(--dim); padding:10px 0;">Carregando todas as tabelas…</div>
+  </main>
+</div>
+
+<div class="foot">
+  Projeto <b>Sandman</b> · banco de dados e API ·
+  <a href="https://github.com/eduardoosganascimento-beep/sandman-db" target="_blank">github.com/eduardoosganascimento-beep/sandman-db</a><br>
+  <span style="opacity:.75">No plano grátis o Render dorme com inactivity — se a página demorar, aguarde ~50s e recarregue.</span>
+</div>
 
 <script>
-const TABLES = [
-  ['config', 'game_config', '/api/config'],
-  ['chapters', 'chapters (5 capítulos)', '/api/chapters'],
-  ['characters', 'characters', '/api/characters'],
-  ['mechanics', 'mechanics', '/api/mechanics'],
-  ['enemies', 'enemies', '/api/enemies'],
-  ['difficulties', 'difficulties', '/api/difficulties'],
-  ['controls', 'controls', '/api/controls'],
-  ['checkpoints', 'checkpoints', '/api/checkpoints'],
-  ['memories', 'memories', '/api/memories'],
-];
-const tabsEl = document.getElementById('tabs');
-const contentEl = document.getElementById('content');
-let current = null;
-
-TABLES.forEach(([id, label]) => {
-  const b = document.createElement('button');
-  b.className = 'tab'; b.textContent = label; b.dataset.id = id;
-  b.onclick = () => show(id);
-  tabsEl.appendChild(b);
-});
-
-function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-async function show(id) {
-  current = id;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.id === id));
-  contentEl.innerHTML = '<div class="loading">Carregando dados…</div>';
-  const [, label, url] = TABLES.find(t => t[0] === id);
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const rows = await res.json();
-    if (current !== id) return;
-    if (!rows.length) { contentEl.innerHTML = '<div class="loading">Tabela vazia (a ser preenchida conforme o roteiro for escrito).</div>'; return; }
-    const cols = Object.keys(rows[0]);
-    let html = `<div class="count">${rows.length} registro(s) · ${esc(label)}</div><table><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
-    html += rows.map(r => `<tr>${cols.map(c => `<td>${esc(r[c])}</td>`).join('')}</tr>`).join('');
-    html += '</tbody></table>';
-    contentEl.innerHTML = html;
-  } catch (e) {
-    contentEl.innerHTML = '<div class="error">Erro ao carregar: ' + esc(e.message) + ' — o banco ainda pode estar inicializando.</div>';
+/* ============================================================
+   CATEGORIAS → TABELAS
+   Cada categoria agrupa as tabelas que pertencem a ela.
+   ============================================================ */
+const CATEGORIES = [
+  {
+    id: 'config', icon: '⚙️',
+    name: 'Configurações Gerais',
+    desc: 'Regras, metadados e ajustes do jogo em formato chave/valor.',
+    tables: ['game_config']
+  },
+  {
+    id: 'campanha', icon: '📖',
+    name: 'História & Campanha',
+    desc: 'O arco narrativo: capítulos, pontos de salvamento e memórias que liberam flashbacks.',
+    tables: ['chapters', 'checkpoints', 'memories']
+  },
+  {
+    id: 'jogo', icon: '🎮',
+    name: 'Jogo & Mecânica',
+    desc: 'O que o jogador faz: mecânicas, níveis de dificuldade e mapa de controles.',
+    tables: ['mechanics', 'difficulties', 'controls']
+  },
+  {
+    id: 'personagens', icon: '👥',
+    name: 'Personagens & Inimigos',
+    desc: 'Quem aparece na história e os padrões de comportamento dos adversários.',
+    tables: ['characters', 'enemies']
   }
+];
+
+/* Definição de cada tabela: endpoint, descrição, colunas legíveis e relações */
+const TABLES = {
+  game_config: {
+    title: 'Configurações gerais',
+    endpoint: '/api/config',
+    desc: 'Pares chave/valor com as definições globais: título, gênero, duração alvo, resolução, regras de morte e salvamento.',
+    cols: { chave: 'Chave', valor: 'Valor' },
+    special: { chave: 'code' },
+    rel: []
+  },
+  chapters: {
+    title: 'Os 5 capítulos',
+    endpoint: '/api/chapters',
+    desc: 'Campanha completa em ordem, com a sinopse e a mecânica nova introduzida em cada capítulo.',
+    cols: { numero: 'Nº', titulo: 'Título', sinopse: 'Sinopse', mecanica_nova: 'Mecânica nova' },
+    special: { numero: 'num' },
+    rel: ['chapters 1 ──▶ N mechanics', 'chapters 1 ──▶ N checkpoints', 'chapters 1 ──▶ N memories']
+  },
+  checkpoints: {
+    title: 'Pontos de salvamento',
+    endpoint: '/api/checkpoints',
+    desc: 'Início de cada capítulo e as fogueiras espalhadas pelos cenários.',
+    cols: { tipo: 'Tipo', descricao: 'Descrição', capitulo: 'Capítulo' },
+    special: { capitulo: 'num' },
+    rel: ['checkpoints N ◀── 1 chapters (capitulo_id)']
+  },
+  memories: {
+    title: 'Memórias (flashbacks)',
+    endpoint: '/api/memories',
+    desc: 'Itens narrativos que o jogador encontra e que liberam flashbacks. Tabela pronta — ainda vazia, será preenchida conforme o roteiro.',
+    cols: { nome: 'Nome', descricao: 'Descrição', capitulo: 'Capítulo' },
+    special: { capitulo: 'num' },
+    rel: ['memories N ◀── 1 chapters (capitulo_id)']
+  },
+  mechanics: {
+    title: 'Mecânicas do jogo',
+    endpoint: '/api/mechanics',
+    desc: 'Mecânicas de movimento, combate e recursos, com o capítulo em que são desbloqueadas.',
+    cols: { categoria: 'Categoria', nome: 'Nome', descricao: 'Descrição', desbloqueio_capitulo: 'Desbloqueia no capítulo' },
+    special: { categoria: 'tag', desbloqueio_capitulo: 'num' },
+    rel: ['mechanics N ◀── 1 chapters (desbloqueio_capitulo)']
+  },
+  difficulties: {
+    title: 'Níveis de dificuldade',
+    endpoint: '/api/difficulties',
+    desc: 'As três opções de dificuldade oferecidas ao jogador.',
+    cols: { nome: 'Nome', descricao: 'Descrição' },
+    special: { nome: 'tag' },
+    rel: []
+  },
+  controls: {
+    title: 'Mapa de controles',
+    endpoint: '/api/controls',
+    desc: 'Cada ação do jogador com a tecla do teclado e o botão do controle.',
+    cols: { acao: 'Ação', teclado: 'Teclado', controle: 'Controle', ordem: 'Nº' },
+    special: { teclado: 'code', controle: 'code', ordem: 'num' },
+    rel: []
+  },
+  characters: {
+    title: 'Personagens',
+    endpoint: '/api/characters',
+    desc: 'Sandman, sua família, os colonos e os anciãos — com o papel de cada um na história.',
+    cols: { nome: 'Nome', papel: 'Papel', descricao: 'Descrição' },
+    special: { papel: 'tag' },
+    rel: []
+  },
+  enemies: {
+    title: 'Padrões de inimigos',
+    endpoint: '/api/enemies',
+    desc: 'Comportamentos dos adversários: patrulha, investida e ataque à distância.',
+    cols: { nome: 'Nome', padrao: 'Padrão', descricao: 'Descrição' },
+    special: { padrao: 'tag' },
+    rel: []
+  }
+};
+
+const state = { rows: {}, errors: {} };
+const $ = (s) => document.querySelector(s);
+
+/* ── Utilidades ─────────────────────────────── */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-show('chapters');
+function fmt(v) {
+  if (v === null || v === undefined) return '<span class="kw">NULL</span>';
+  if (typeof v === 'number') return String(v);
+  return esc(v);
+}
+function cell(v, kind) {
+  if (v === null || v === undefined) return '<span class="kw">NULL</span>';
+  if (kind === 'num') return '<span class="num">' + esc(v) + '</span>';
+  if (kind === 'tag') return '<span class="tag-chip">' + esc(v) + '</span>';
+  if (kind === 'code') return '<code>' + esc(v) + '</code>';
+  return esc(v);
+}
+const allTableIds = () => CATEGORIES.flatMap(c => c.tables);
+
+/* ── Carregamento ───────────────────────────── */
+async function loadAll() {
+  await Promise.all(allTableIds().map(async (id) => {
+    try {
+      const res = await fetch(TABLES[id].endpoint);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      state.rows[id] = await res.json();
+      state.errors[id] = null;
+    } catch (e) {
+      state.rows[id] = [];
+      state.errors[id] = e.message;
+    }
+  }));
+  render();
+}
+
+/* ── Render ─────────────────────────────────── */
+function render() {
+  renderStats();
+  renderNav();
+  renderMain();
+  applySearch();
+}
+
+function renderStats() {
+  const ids = allTableIds();
+  const total = ids.reduce((n, id) => n + (state.rows[id] || []).length, 0);
+  $('#st-cats').textContent = CATEGORIES.length;
+  $('#st-tables').textContent = ids.length;
+  $('#st-rows').textContent = total;
+}
+
+function renderNav() {
+  const nav = $('#nav');
+  nav.innerHTML = CATEGORIES.map(cat => `
+    <div class="sgroup">
+      <div class="shead">${cat.icon} ${esc(cat.name)}</div>
+      ${cat.tables.map(id => {
+        const n = (state.rows[id] || []).length;
+        const err = state.errors[id];
+        const badge = err ? '<span class="pill" style="color:var(--red)">erro</span>'
+                          : `<span class="pill" data-count="${id}">${n}</span>`;
+        return `<a class="slink" href="#t-${id}" data-target="t-${id}"><span>${id}</span>${badge}</a>`;
+      }).join('')}
+    </div>`).join('');
+
+  nav.querySelectorAll('.slink').forEach(a => {
+    a.addEventListener('click', () => {
+      nav.querySelectorAll('.slink').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+}
+
+function renderMain() {
+  const main = $('#main');
+  main.innerHTML = CATEGORIES.map(cat => {
+    const rowsCat = cat.tables.reduce((n, id) => n + (state.rows[id] || []).length, 0);
+    return `
+    <section class="cat" id="cat-${cat.id}">
+      <div class="cathead">
+        <div class="catico">${cat.icon}</div>
+        <div>
+          <h2>${esc(cat.name)}</h2>
+          <p>${esc(cat.desc)}</p>
+        </div>
+        <div class="catstats">
+          <span class="chip"><b>${cat.tables.length}</b> tabela(s)</span>
+          <span class="chip"><b>${rowsCat}</b> registro(s)</span>
+        </div>
+      </div>
+      <div class="tgrid">
+        ${cat.tables.map(id => tableCard(id)).join('')}
+      </div>
+    </section>`;
+  }).join('');
+}
+
+function tableCard(id) {
+  const def = TABLES[id];
+  const err = state.errors[id];
+  const rows = state.rows[id] || [];
+  const cols = Object.keys(def.cols);
+
+  let body;
+  if (err) {
+    body = `<div class="error">⚠️ Erro ao carregar: ${esc(err)} — o banco pode estar acordando (até ~50s) ou reiniciando.</div>`;
+  } else if (!rows.length) {
+    body = `<div class="empty">📭 Tabela vazia — será preenchida conforme o roteiro for escrito.</div>`;
+  } else {
+    body = `
+      <div class="twrap">
+        <table>
+          <thead><tr>${cols.map(c => `<th>${esc(def.cols[c])}</th>`).join('')}</tr></thead>
+          <tbody>
+            ${rows.map(r => `<tr>${cols.map(c => `<td data-v="${esc(String(r[c] ?? ''))}">${cell(r[c], (def.special || {})[c])}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  const badgeCls = err ? 'badge empty' : (rows.length ? 'badge' : 'badge empty');
+  const badgeTxt = err ? 'erro' : (rows.length ? rows.length + ' registro(s)' : 'vazia');
+
+  return `
+    <article class="tcard" id="t-${id}">
+      <div class="tchead">
+        <span class="tname">${id}</span>
+        <span class="ttitle">${esc(def.title)}</span>
+        <div class="tmeta">
+          <span class="${badgeCls}">${badgeTxt}</span>
+          <a class="jslink" href="${def.endpoint}" target="_blank">GET ${def.endpoint} ↗</a>
+        </div>
+      </div>
+      <p class="tdesc">${esc(def.desc)}</p>
+      ${def.rel.length ? `<div class="trel">${def.rel.map(r => `<span class="rel">${esc(r)}</span>`).join('')}</div>` : ''}
+      ${body}
+    </article>`;
+}
+
+/* ── Busca global ───────────────────────────── */
+function applySearch() {
+  const term = ($('#search').value || '').trim().toLowerCase();
+  let hits = 0, tablesHit = 0;
+
+  document.querySelectorAll('.tcard').forEach(card => {
+    const rows = card.querySelectorAll('tbody tr');
+    if (!rows.length) { card.classList.remove('found'); return; }
+    let inTable = 0;
+    rows.forEach(tr => {
+      const match = !term || Array.from(tr.querySelectorAll('td'))
+        .some(td => (td.dataset.v || td.textContent).toLowerCase().includes(term));
+      tr.style.display = match ? '' : 'none';
+      if (match) inTable++;
+    });
+    if (term && inTable > 0) { hits += inTable; tablesHit++; card.classList.add('found'); }
+    else card.classList.remove('found');
+
+    const tbody = card.querySelector('tbody');
+    let none = card.querySelector('.nohit');
+    if (term && rows.length && inTable === 0) {
+      if (!none) {
+        none = document.createElement('div');
+        none.className = 'empty nohit';
+        none.textContent = 'Nenhum registro corresponde à busca.';
+        tbody.closest('.twrap').appendChild(none);
+      }
+    } else if (none) none.remove();
+  });
+
+  $('#searchInfo').textContent = term
+    ? `${hits} registro(s) em ${tablesHit} tabela(s)`
+    : '';
+}
+
+/* ── Scrollspy na sidebar ───────────────────── */
+function spy() {
+  const links = document.querySelectorAll('.slink');
+  let current = null;
+  document.querySelectorAll('.tcard').forEach(card => {
+    if (card.getBoundingClientRect().top < 140) current = card.id;
+  });
+  links.forEach(a => a.classList.toggle('active', a.dataset.target === current));
+}
+
+/* ── Eventos ────────────────────────────────── */
+$('#search').addEventListener('input', applySearch);
+$('#refresh').addEventListener('click', async (e) => {
+  const b = e.currentTarget;
+  b.classList.add('loading');
+  b.textContent = '↻ Carregando…';
+  await loadAll();
+  b.classList.remove('loading');
+  b.textContent = '↻ Atualizar';
+});
+window.addEventListener('scroll', spy, { passive: true });
+
+loadAll();
 </script>
 </body>
 </html>
