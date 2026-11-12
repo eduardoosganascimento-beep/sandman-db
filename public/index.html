@@ -4,151 +4,184 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sandman DB — Banco de Dados do Jogo</title>
-<meta name="theme-color" content="#0e0c0a">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
   :root {
-    --bg:#0e0c0a; --panel:#16130f; --card:#1a1713; --card2:#211d18;
-    --line:#2f2820; --line2:#3b332a; --txt:#ece5db; --dim:#a5988a;
-    --accent:#e6a84f; --green:#7fb069; --blue:#7ec8e3; --red:#e07a5f;
-    --purple:#b79ddb; --radius:12px;
+    --bg:#0b0f14; --panel:#10151c; --card:#151b23; --card2:#1a222c;
+    --line:#26313d; --line2:#334155; --txt:#e8edf4; --dim:#94a3b8;
+    --accent:#22d3ee; --green:#34d399; --blue:#60a5fa; --red:#f87171;
+    --purple:#a78bfa; --radius:14px;
     --mono:ui-monospace, 'Cascadia Mono', Consolas, 'Courier New', monospace;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   html { scroll-behavior:smooth; }
-  body { background:var(--bg); color:var(--txt); font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55; }
+  body { background:radial-gradient(1100px 540px at 85% -8%, rgba(34,211,238,.08), transparent 60%),
+              radial-gradient(900px 520px at -8% 4%, rgba(167,139,250,.07), transparent 60%), var(--bg);
+          color:var(--txt); font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55; }
   a { color:var(--accent); text-decoration:none; }
   a:hover { text-decoration:underline; }
   code, pre { font-family:var(--mono); }
   ::selection { background:var(--accent); color:#17130f; }
 
-  /* ══ TOPO ════════════════════════════════════ */
-  .top { border-bottom:1px solid var(--line); background:radial-gradient(1000px 240px at 15% -40%, #241d15, transparent), #12100e; }
-  .top-in { max-width:1460px; margin:0 auto; padding:24px 24px 18px; }
-  h1 { font-size:26px; letter-spacing:.2px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  h1 .brand { color:var(--accent); }
+  /* ══ TOPO ══════════════════════════════════════════════ */
+  .top { border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg, rgba(34,211,238,.07), transparent 60%),
+                     radial-gradient(900px 260px at 12% -30%, #14202c, transparent), var(--bg); }
+  .top-in { max-width:1460px; margin:0 auto; padding:26px 24px 20px; }
+  .kicker { font-size:11px; letter-spacing:2.4px; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  h1 { font-size:27px; letter-spacing:.2px; margin-top:4px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  h1 .brand { background:linear-gradient(90deg,#22d3ee,#a78bfa); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
   h1 .tag { font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#17130f; background:var(--accent); padding:3px 9px; border-radius:20px; }
-  .sub { color:var(--dim); font-size:14px; margin-top:6px; }
-  .links { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .sub { color:var(--dim); font-size:14px; margin-top:7px; max-width:760px; }
+  .links { display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; }
   .links a { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:7px 13px; border-radius:8px; font-size:13px; transition:.15s; }
-  .links a:hover { border-color:var(--accent); color:var(--accent); text-decoration:none; }
+  .links a:hover { border-color:var(--accent); color:var(--accent); text-decoration:none; transform:translateY(-1px); }
   .links a.primary { background:var(--accent); border-color:var(--accent); color:#17130f; font-weight:600; }
   .links a.primary:hover { filter:brightness(1.08); }
 
-  .stats { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
-  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 14px; min-width:135px; }
-  .stat b { display:block; font-size:19px; color:var(--accent); font-family:var(--mono); }
+  .stats { display:flex; flex-wrap:wrap; gap:10px; margin-top:17px; }
+  .stat { background:linear-gradient(180deg,#18202e,#131722); border:1px solid var(--line); border-radius:10px; padding:10px 15px; min-width:140px; position:relative; overflow:hidden; }
+  .stat::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent); opacity:.75; }
+  .stat b { display:block; font-size:20px; color:var(--accent); font-family:var(--mono); line-height:1.2; }
   .stat span { font-size:10.5px; color:var(--dim); text-transform:uppercase; letter-spacing:.7px; }
 
-  .tools { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center; }
+  .tools { display:flex; gap:10px; flex-wrap:wrap; margin-top:15px; align-items:center; }
   .search { flex:1; min-width:230px; position:relative; }
-  .search input { width:100%; background:var(--card); border:1px solid var(--line); color:var(--txt); padding:10px 14px 10px 36px; border-radius:10px; font-size:14px; outline:none; }
-  .search input:focus { border-color:var(--accent); }
-  .search::before { content:"🔍"; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.75; }
-  .btn { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:10px 16px; border-radius:10px; cursor:pointer; font-size:14px; transition:.15s; }
-  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .search input { width:100%; background:var(--card); border:1px solid var(--line); color:var(--txt); padding:11px 14px 11px 37px; border-radius:10px; font-size:14px; outline:none; transition:.15s; }
+  .search input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,168,79,.14); }
+  .search::before { content:"🔍"; position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.75; }
+  .btn { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:11px 17px; border-radius:10px; cursor:pointer; font-size:14px; transition:.15s; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-1px); }
   .btn.loading { opacity:.6; pointer-events:none; }
   #searchInfo { font-size:12px; color:var(--dim); }
 
-  /* ══ LAYOUT ══════════════════════════════════ */
-  .wrap { max-width:1460px; margin:0 auto; padding:24px; display:grid; grid-template-columns:248px 1fr; gap:26px; align-items:start; }
+  /* ══ LAYOUT ════════════════════════════════════════════ */
+  .wrap { max-width:1460px; margin:0 auto; padding:24px; display:grid; grid-template-columns:252px 1fr; gap:26px; align-items:start; }
 
-  /* ══ SIDEBAR (árvore do banco) ═══════════════ */
-  .side { position:sticky; top:16px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 12px; max-height:calc(100vh - 32px); overflow:auto; }
+  /* ══ SIDEBAR ═══════════════════════════════════════════ */
+  .side { position:sticky; top:16px; background:linear-gradient(180deg,#131a26,#10151c); border:1px solid var(--line); border-radius:var(--radius); padding:14px 12px; max-height:calc(100vh - 32px); overflow:auto; }
   .side::-webkit-scrollbar { width:8px; } .side::-webkit-scrollbar-thumb { background:var(--line2); border-radius:8px; }
-  .dbroot { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:7px; padding:6px 8px; border-bottom:1px solid var(--line); margin-bottom:10px; }
-  .dbroot small { color:var(--dim); font-weight:400; font-family:'Segoe UI', sans-serif; }
+  .dbroot { font-family:var(--mono); font-size:13.5px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:7px; padding:6px 8px 9px; border-bottom:1px solid var(--line); margin-bottom:10px; }
+  .dbroot small { color:var(--dim); font-weight:400; font-family:'Segoe UI', sans-serif; font-size:11.5px; }
   .sgroup { margin-bottom:13px; }
-  .shead { display:flex; align-items:center; gap:7px; font-size:11.5px; font-weight:600; color:var(--accent); padding:5px 6px; border-bottom:1px dashed var(--line); margin-bottom:5px; letter-spacing:.3px; }
-  .stree { position:relative; padding-left:12px; }
-  .stree::before { content:""; position:absolute; left:3px; top:4px; bottom:6px; width:1px; background:var(--line2); }
-  .slink { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:6px 8px; border-radius:7px; font-size:12.5px; font-family:var(--mono); color:var(--txt); transition:.12s; position:relative; }
-  .slink::before { content:""; position:absolute; left:-9px; top:50%; width:7px; height:1px; background:var(--line2); }
+  .shead { display:flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; color:var(--c,var(--accent)); padding:6px 6px; border-bottom:1px dashed var(--line2); margin-bottom:5px; letter-spacing:.3px; }
+  .shead .dot { width:7px; height:7px; border-radius:50%; background:var(--c,var(--accent)); box-shadow:0 0 6px var(--c,var(--accent)); }
+  .stree { position:relative; padding-left:13px; }
+  .stree::before { content:""; position:absolute; left:4px; top:4px; bottom:6px; width:1px; background:var(--line2); }
+  .slink { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:6px 9px; border-radius:7px; font-size:12.5px; font-family:var(--mono); color:var(--txt); transition:.12s; position:relative; }
+  .slink::before { content:""; position:absolute; left:-9px; top:50%; width:8px; height:1px; background:var(--line2); }
   .slink:hover { background:var(--card2); text-decoration:none; }
-  .slink.active { background:var(--accent); color:#17130f; font-weight:700; }
-  .pill { font-size:10.5px; font-family:'Segoe UI', sans-serif; background:#2a241e; color:var(--green); padding:1px 7px; border-radius:20px; border:1px solid var(--line); }
-  .slink.active .pill { background:#17130f26; border-color:#17130f44; color:#17130f; }
+  .slink.active { background:var(--c,var(--accent)); color:#14110e; font-weight:700; }
+  .pill { font-size:10.5px; font-family:'Segoe UI', sans-serif; background:#0f2a20; color:var(--green); padding:1px 7px; border-radius:20px; border:1px solid var(--line); }
+  .slink.active .pill { background:#14110e26; border-color:#14110e44; color:#14110e; }
+  .homelink { display:flex; gap:8px; align-items:center; font-size:12px; color:var(--dim); padding:7px 8px; border-top:1px solid var(--line); margin-top:4px; }
+  .homelink:hover { color:var(--accent); text-decoration:none; }
 
-  /* ══ CATEGORIAS ══════════════════════════════ */
-  .cat { margin-bottom:36px; scroll-margin-top:16px; }
-  .cathead { display:flex; align-items:flex-start; gap:14px; padding-bottom:12px; border-bottom:2px solid var(--line); margin-bottom:16px; flex-wrap:wrap; }
-  .catico { font-size:23px; background:var(--card); border:1px solid var(--line); border-radius:11px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  .cathead h2 { font-size:19px; letter-spacing:.2px; }
+  /* ══ TILES DE ATALHO ═══════════════════════════════════ */
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(185px,1fr)); gap:12px; margin-bottom:28px; }
+  .stile { background:linear-gradient(180deg,#1d1915,#171412); border:1px solid var(--line); border-top:3px solid var(--c,var(--accent)); border-radius:11px; padding:13px 14px; display:block; transition:.16s; }
+  .stile:hover { transform:translateY(-3px); border-color:var(--c,var(--accent)); text-decoration:none; box-shadow:0 8px 22px rgba(0,0,0,.35); }
+  .stile .tico { font-size:20px; }
+  .stile .tn { display:block; font-size:14px; font-weight:700; color:var(--txt); margin-top:6px; }
+  .stile .tm { display:block; font-size:11.5px; color:var(--dim); font-family:var(--mono); margin-top:3px; }
+  .stile .tm b { color:var(--c,var(--accent)); }
+
+  /* ══ CATEGORIAS ════════════════════════════════════════ */
+  .cat { margin-bottom:36px; scroll-margin-top:16px; --c:var(--accent); }
+  .cathead { display:flex; align-items:flex-start; gap:14px; padding-bottom:13px; border-bottom:1px solid var(--line); margin-bottom:16px; flex-wrap:wrap; position:relative; }
+  .cathead::after { content:""; position:absolute; left:0; bottom:-1px; width:74px; height:2px; background:var(--c); }
+  .catico { font-size:23px; background:var(--card); border:1px solid var(--line); border-bottom:2px solid var(--c); border-radius:11px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .cathead h2 { font-size:19.5px; letter-spacing:.2px; color:var(--c); }
   .cathead p { color:var(--dim); font-size:13px; max-width:660px; }
   .catstats { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
-  .chip { font-size:11px; background:var(--card); border:1px solid var(--line); color:var(--dim); padding:4px 10px; border-radius:20px; }
-  .chip b { color:var(--accent); font-family:var(--mono); }
+  .chip { font-size:11px; background:var(--card); border:1px solid var(--line); color:var(--dim); padding:4px 11px; border-radius:20px; }
+  .chip b { color:var(--c); font-family:var(--mono); }
 
   .tgrid { display:flex; flex-direction:column; gap:18px; }
 
-  /* ══ CARD DE TABELA ══════════════════════════ */
+  /* ══ CARD DE TABELA ════════════════════════════════════ */
   .tcard { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; scroll-margin-top:16px; transition:border-color .15s, box-shadow .15s; }
-  .tcard:hover { border-color:#4a3f36; }
+  .tcard:hover { border-color:#4a3f36; box-shadow:0 6px 20px rgba(0,0,0,.28); }
   .tcard.found { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
-  .tchead { display:flex; align-items:center; gap:14px; padding:13px 16px; background:linear-gradient(180deg,#251f19,#1f1a15); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tchead { display:flex; align-items:center; gap:14px; padding:13px 16px;
+            background:linear-gradient(180deg,#1c2430,#171d28); border-bottom:1px solid var(--line);
+            border-left:3px solid var(--c); flex-wrap:wrap; }
   .crumb { font-family:var(--mono); font-size:11px; color:var(--dim); margin-bottom:3px; }
-  .crumb b { color:var(--accent); }
+  .crumb b { color:var(--c); }
   .th-title { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
-  .tname { font-family:var(--mono); font-size:16px; font-weight:700; color:var(--accent); }
+  .tname { font-family:var(--mono); font-size:16px; font-weight:700; color:var(--c); }
   .ttitle { font-size:13px; color:var(--dim); }
   .tmeta { margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .badge { font-size:12px; background:#233026; color:var(--green); border:1px solid #34472f; padding:3px 10px; border-radius:20px; font-weight:600; }
-  .badge.fields { background:#1c2733; color:var(--blue); border-color:#2c3d4f; }
-  .badge.empty { background:#302323; color:var(--red); border-color:#4a3333; }
+  .badge { font-size:12px; background:#0f2a20; color:var(--green); border:1px solid #1d4630; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .badge.fields { background:#0f2030; color:var(--blue); border-color:#1e3a52; }
+  .badge.empty { background:#331a1a; color:var(--red); border-color:#522626; }
   .jslink { font-size:12px; font-family:var(--mono); }
   .tdesc { font-size:13.5px; color:var(--dim); padding:12px 16px 0; }
   .trel { display:flex; flex-wrap:wrap; gap:6px; padding:10px 16px 0; }
-  .rel { font-size:11px; font-family:var(--mono); background:#18222d; color:var(--blue); border:1px solid #27374a; padding:3px 9px; border-radius:6px; }
+  .rel { font-size:11px; font-family:var(--mono); background:#0f2030; color:var(--blue); border:1px solid #1e3a52; padding:3px 9px; border-radius:6px; }
 
-  /* Painéis internos (campos / dados) */
-  .panel { margin:14px 16px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-  .panel:last-of-type { margin-bottom:6px; }
-  .panelhead { display:flex; align-items:center; gap:10px; padding:9px 13px; background:#241e18; border-bottom:1px solid var(--line); font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--txt); }
+  /* Painéis internos */
+  .panel { margin:14px 16px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#131722; }
+  .panel:last-of-type { margin-bottom:8px; }
+  .panelhead { display:flex; align-items:center; gap:10px; padding:9px 13px; background:#16202e; border-bottom:1px solid var(--line); font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--txt); }
   .panelhead .hint { font-weight:400; text-transform:none; letter-spacing:0; color:var(--dim); font-size:11.5px; }
-  .panelhead .count { margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--accent); text-transform:none; letter-spacing:0; }
-  .twrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:13.5px; }
-  thead th { background:#2a231c; color:var(--accent); text-align:left; padding:8px 12px; font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .panelhead .count { margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--c); text-transform:none; letter-spacing:0; }
+  .twrap { overflow:auto; max-height:430px; }
+  table { width:100%; border-collapse:separate; border-spacing:0; font-size:13.5px; }
+  .pre { padding:13px 14px 14px; font-size:12.2px; line-height:1.6; color:#c9d4e0; overflow-x:auto; white-space:pre; }
+  thead th { position:sticky; top:0; z-index:1; background:#1f2b3a; color:var(--accent); text-align:left;
+             padding:9px 12px; font-size:10.5px; text-transform:uppercase; letter-spacing:.7px;
+             border-bottom:1px solid var(--line); white-space:nowrap; box-shadow:0 1px 0 var(--line); }
   tbody td { padding:8px 12px; border-bottom:1px solid #27211c; vertical-align:top; }
   tbody tr:last-child td { border-bottom:none; }
-  tbody tr:nth-child(even) td { background:#1e1a16; }
-  tbody tr:hover td { background:#282119; }
+  tbody tr:nth-child(even) td { background:#1a2230; }
+  tbody tr:hover td { background:#2a3342; }
+  td.idx, th.idx { color:#6d6255; font-family:var(--mono); font-size:11.5px; width:44px; text-align:right; background:#17140f; }
   .kw { color:var(--dim); }
 
   /* Campos */
   table.fields td.fname { font-family:var(--mono); color:#f0e6d8; font-weight:600; white-space:nowrap; }
   table.fields td.fname .ico { margin-right:5px; opacity:.85; }
-  .ftype { font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:5px; white-space:nowrap; }
-  .ftype.int { background:#18222d; color:var(--blue); border:1px solid #27374a; }
-  .ftype.txt { background:#1d2a1c; color:var(--green); border:1px solid #2f4430; }
+  .ftype { font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:5px; white-space:nowrap; display:inline-block; }
+  .ftype.int { background:#0f2030; color:var(--blue); border:1px solid #1e3a52; }
+  .ftype.txt { background:#0f2a1d; color:var(--green); border:1px solid #1d4630; }
   .rtype { display:flex; gap:5px; flex-wrap:wrap; }
-  .r { font-size:10.5px; padding:2px 7px; border-radius:20px; border:1px solid var(--line2); background:#241f1a; color:var(--dim); white-space:nowrap; }
-  .r.pk { background:#2e2715; color:var(--accent); border-color:#4b3f22; font-weight:700; }
-  .r.fk { background:#18222d; color:var(--blue); border-color:#27374a; }
-  .r.nn { background:#2a2030; color:var(--purple); border-color:#3d2f47; }
-  .r.un { background:#1d2a1c; color:var(--green); border-color:#2f4430; }
+  .r { font-size:10.5px; padding:2px 7px; border-radius:20px; border:1px solid var(--line2); background:#1b2430; color:var(--dim); white-space:nowrap; }
+  .r.pk { background:#22334d; color:var(--blue); border-color:#334155; font-weight:700; }
+  .r.fk { background:#0f2030; color:var(--blue); border-color:#1e3a52; }
+  .r.nn { background:#241d33; color:var(--purple); border-color:#3d2f57; }
+  .r.un { background:#0f2a20; color:var(--green); border-color:#1d4630; }
   .fnotes { color:var(--dim); font-size:13px; }
   .internal { font-size:10px; color:var(--dim); border:1px dashed var(--line2); padding:1px 6px; border-radius:5px; margin-left:6px; }
 
   /* Dados */
   .num { color:var(--blue); font-family:var(--mono); }
   .tag-chip { display:inline-block; background:#2a241e; border:1px solid var(--line); color:var(--accent); font-size:12px; padding:1px 9px; border-radius:20px; }
-  .empty, .error { color:var(--dim); font-style:italic; font-size:13.5px; padding:16px 14px; }
+  .empty, .error { color:var(--dim); font-style:italic; font-size:13.5px; padding:17px 15px; text-align:center; }
   .error { color:var(--red); }
-  mark { background:var(--accent); color:#17130f; border-radius:3px; }
-  .nohit { border-top:1px solid var(--line); }
+  mark { background:var(--accent); color:#17130f; border-radius:3px; padding:0 1px; }
 
   /* SQL */
-  details.sql { margin:14px 16px 16px; border:1px solid var(--line); border-radius:10px; background:#141110; }
+  details.sql { margin:14px 16px 16px; border:1px solid var(--line); border-radius:10px; background:#0d1117; }
   details.sql summary { cursor:pointer; padding:9px 13px; font-size:12px; font-weight:600; color:var(--dim); letter-spacing:.5px; text-transform:uppercase; list-style:none; }
   details.sql summary::-webkit-details-marker { display:none; }
-  details.sql summary::before { content:"▸ "; color:var(--accent); }
+  details.sql summary::before { content:"▸ "; color:var(--c,var(--accent)); }
   details.sql[open] summary::before { content:"▾ "; }
   details.sql summary:hover { color:var(--accent); }
-  details.sql pre { padding:12px 14px; border-top:1px solid var(--line); font-size:12.2px; line-height:1.6; color:#cfc4b6; overflow-x:auto; white-space:pre; }
-  details.sql pre .kw2 { color:var(--purple); }
+  .sqlbody { position:relative; border-top:1px solid var(--line); }
+  .sqlbody pre { padding:13px 14px 14px; font-size:12.2px; line-height:1.6; color:#cfc4b6; overflow-x:auto; white-space:pre; }
+  .copy { position:absolute; right:8px; top:8px; font-size:11px; background:var(--card2); border:1px solid var(--line);
+          color:var(--dim); padding:3px 10px; border-radius:6px; cursor:pointer; font-family:'Segoe UI', sans-serif; }
+  .copy:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* ══ LEGENDA ═══════════════════════════════════════════ */
+  .legend { background:linear-gradient(180deg,#131a26,#10151c); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:8px; }
+  .legend h2 { font-size:16px; margin-bottom:4px; }
+  .legend > p { color:var(--dim); font-size:12.5px; margin-bottom:14px; }
+  .lgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; }
+  .litem { background:var(--card); border:1px solid var(--line); border-radius:9px; padding:9px 11px; display:flex; gap:9px; align-items:flex-start; }
+  .litem .li { flex:0 0 auto; }
+  .litem .lt { font-size:12.5px; color:var(--txt); }
+  .litem .ld { font-size:11.5px; color:var(--dim); display:block; }
 
   .foot { border-top:1px solid var(--line); margin-top:8px; padding:20px 24px 32px; color:var(--dim); font-size:12.5px; text-align:center; }
 
@@ -158,6 +191,7 @@
     .catstats { margin-left:0; width:100%; }
     h1 { font-size:21px; }
     .panel { margin-left:10px; margin-right:10px; }
+    .twrap { max-height:340px; }
   }
 </style>
 </head>
@@ -165,22 +199,22 @@
 
 <div class="top">
   <div class="top-in">
-    <h1>🗄️ <span class="brand">Sandman</span> — Banco de Dados do Jogo <span class="tag">PostgreSQL 18</span></h1>
+    <div class="kicker">PostgreSQL 18 · Render · API REST</div>
+    <h1>🗄️ <span class="brand">Sandman</span> — Banco de Dados do Jogo <span class="tag">visualizador</span></h1>
     <div class="sub">
-      Hierarquia completa: <b>banco</b> → <b>categorias</b> → <b>tabelas</b> → <b>campos</b> → <b>dados</b>
-      · hospedado no Render · conteúdo extraído do <code>PLANO-DO-JOGO.md</code>
+      Hierarquia completa e organizada: <b>banco</b> → <b>categorias</b> → <b>tabelas</b> → <b>campos</b> → <b>dados</b>.
+      Todo o conteúdo do <code>PLANO-DO-JOGO.md</code> consultável por HTTP.
     </div>
 
     <div class="links">
-      <a class="primary" href="/crud.html">✍️ Cadastro / Edição (CRUD)</a>
-      <a href="https://github.com/eduardoosganascimento-beep/sandman-db" target="_blank">💻 GitHub</a>
+      <a class="primary" href="https://github.com/eduardoosganascimento-beep/sandman-db" target="_blank">💻 GitHub</a>
       <a href="https://github.com/eduardoosganascimento-beep/sandman-db/blob/main/docs/PLANO-BANCO.md" target="_blank">📐 Plano do banco</a>
       <a href="/api" target="_blank">🔌 API (JSON)</a>
       <a href="/health" target="_blank">💓 Health</a>
     </div>
 
     <div class="stats">
-      <div class="stat"><b>1</b><span>Banco (sandman-db)</span></div>
+      <div class="stat"><b>1</b><span>Banco · sandman-db</span></div>
       <div class="stat"><b id="st-cats">–</b><span>Categorias</span></div>
       <div class="stat"><b id="st-tables">–</b><span>Tabelas</span></div>
       <div class="stat"><b id="st-fields">–</b><span>Campos</span></div>
@@ -188,7 +222,7 @@
     </div>
 
     <div class="tools">
-      <div class="search"><input id="search" type="search" placeholder="Buscar nos dados e nos campos…" autocomplete="off"></div>
+      <div class="search"><input id="search" type="search" placeholder="Buscar em campos e dados de todas as tabelas…" autocomplete="off"></div>
       <button class="btn" id="refresh">↻ Atualizar</button>
       <span id="searchInfo"></span>
     </div>
@@ -197,8 +231,9 @@
 
 <div class="wrap">
   <aside class="side" id="side">
-    <div class="dbroot">🗄️ sandman-db <small>· 9 tabelas</small></div>
+    <div class="dbroot">🗄️ sandman-db <small>· PostgreSQL · 9 tabelas</small></div>
     <div id="nav"></div>
+    <a class="homelink" href="#top">⬆ voltar ao topo</a>
   </aside>
   <main id="main"><div style="color:var(--dim);padding:10px 0;">Carregando as tabelas…</div></main>
 </div>
@@ -211,25 +246,25 @@
 
 <script>
 /* ============================================================
-   1) CATEGORIAS → TABELAS
+   1) CATEGORIAS → TABELAS  (cada categoria tem sua cor)
    ============================================================ */
 const CATEGORIES = [
-  { id:'config', icon:'⚙️', name:'Configurações Gerais',
+  { id:'config', icon:'⚙️', color:'#22d3ee', name:'Configurações Gerais',
     desc:'Regras, metadados e ajustes globais do jogo, no formato chave/valor.',
     tables:['game_config'] },
-  { id:'campanha', icon:'📖', name:'História & Campanha',
+  { id:'campanha', icon:'📖', color:'#a78bfa', name:'História & Campanha',
     desc:'O arco narrativo: capítulos, pontos de salvamento e memórias que liberam flashbacks.',
     tables:['chapters','checkpoints','memories'] },
-  { id:'jogo', icon:'🎮', name:'Jogo & Mecânica',
+  { id:'jogo', icon:'🎮', color:'#34d399', name:'Jogo & Mecânica',
     desc:'O que o jogador faz: mecânicas, dificuldades e mapa de controles.',
     tables:['mechanics','difficulties','controls'] },
-  { id:'personagens', icon:'👥', name:'Personagens & Inimigos',
+  { id:'personagens', icon:'👥', color:'#f472b6', name:'Personagens & Inimigos',
     desc:'Quem aparece na história e os padrões de comportamento dos adversários.',
     tables:['characters','enemies'] }
 ];
 
 /* ============================================================
-   2) TABELAS: endpoint, descrição, relações e legendas de coluna
+   2) TABELAS: endpoint, descrição, colunas e relações
    ============================================================ */
 const TABLES = {
   game_config: {
@@ -291,73 +326,72 @@ const TABLES = {
 };
 
 /* ============================================================
-   3) CAMPOS: documentação de cada coluna de cada tabela
-      c = campo · t = tipo SQL · pk/fk/nn/un = restrições
-      api = aparece na API (false = só existe no banco) · n = nota
+   3) CAMPOS: documentação de cada coluna
+      pk/fk/nn/un/chk/def = restrições · api:false = só existe no banco
    ============================================================ */
 const FIELDS = {
   game_config: [
-    { c:'chave', t:'TEXT', pk:true, nn:true, api:true, n:'Identificador técnico da configuração (ex.: titulo_provisorio, resolucao_interna).' },
-    { c:'valor', t:'TEXT', nn:true, api:true, n:'Valor correspondente à chave.' }
+    { c:'chave', t:'TEXT', pk:true, nn:true, n:'Identificador técnico da configuração (ex.: titulo_provisorio, resolucao_interna).' },
+    { c:'valor', t:'TEXT', nn:true, n:'Valor correspondente à chave.' }
   ],
   chapters: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna usada pelas chaves estrangeiras de outras tabelas.' },
-    { c:'numero', t:'INTEGER', nn:true, un:true, chk:'BETWEEN 1 AND 5', api:true, n:'Posição do capítulo na campanha — usada como referência das mecânicas.' },
-    { c:'titulo', t:'TEXT', nn:true, api:true, n:'Título exibido do capítulo.' },
-    { c:'sinopse', t:'TEXT', nn:true, api:true, n:'Resumo curto da história do capítulo.' },
-    { c:'mecanica_nova', t:'TEXT', nn:true, api:true, n:'Mecânica apresentada pela primeira vez nesse capítulo.' }
+    { c:'numero', t:'INTEGER', nn:true, un:true, chk:'BETWEEN 1 AND 5', n:'Posição do capítulo na campanha — usada como referência das mecânicas.' },
+    { c:'titulo', t:'TEXT', nn:true, n:'Título exibido do capítulo.' },
+    { c:'sinopse', t:'TEXT', nn:true, n:'Resumo curto da história do capítulo.' },
+    { c:'mecanica_nova', t:'TEXT', nn:true, n:'Mecânica apresentada pela primeira vez nesse capítulo.' }
   ],
   characters: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna do personagem.' },
-    { c:'nome', t:'TEXT', nn:true, un:true, api:true, n:'Nome único do personagem.' },
-    { c:'papel', t:'TEXT', nn:true, api:true, n:'Função na história (protagonista, motivação, antagonista, aliados…).' },
-    { c:'descricao', t:'TEXT', nn:true, api:true, n:'Descrição do personagem.' }
+    { c:'nome', t:'TEXT', nn:true, un:true, n:'Nome único do personagem.' },
+    { c:'papel', t:'TEXT', nn:true, n:'Função na história (protagonista, motivação, antagonista, aliados…).' },
+    { c:'descricao', t:'TEXT', nn:true, n:'Descrição do personagem.' }
   ],
   mechanics: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna da mecânica.' },
-    { c:'categoria', t:'TEXT', nn:true, chk:"IN ('movimento','combate','recurso')", api:true, n:'Agrupa a mecânica por tipo de ação do jogador.' },
-    { c:'nome', t:'TEXT', nn:true, un:true, api:true, n:'Nome único da mecânica.' },
-    { c:'descricao', t:'TEXT', nn:true, api:true, n:'Como a mecânica funciona na prática.' },
-    { c:'desbloqueio_capitulo', t:'INTEGER', fk:'chapters(numero)', api:true, n:'Capítulo que desbloqueia a mecânica; NULL = disponível desde o início.' }
+    { c:'categoria', t:'TEXT', nn:true, chk:"IN ('movimento','combate','recurso')", n:'Agrupa a mecânica por tipo de ação do jogador.' },
+    { c:'nome', t:'TEXT', nn:true, un:true, n:'Nome único da mecânica.' },
+    { c:'descricao', t:'TEXT', nn:true, n:'Como a mecânica funciona na prática.' },
+    { c:'desbloqueio_capitulo', t:'INTEGER', fk:'chapters(numero)', n:'Capítulo que desbloqueia a mecânica; NULL = disponível desde o início.' }
   ],
   enemies: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna do inimigo.' },
-    { c:'nome', t:'TEXT', nn:true, un:true, api:true, n:'Nome do inimigo.' },
-    { c:'padrao', t:'TEXT', nn:true, api:true, n:'Padrão de comportamento (patrulha, investida, ataque à distância).' },
-    { c:'descricao', t:'TEXT', nn:true, api:true, n:'Como o jogador deve reagir a esse padrão.' }
+    { c:'nome', t:'TEXT', nn:true, un:true, n:'Nome do inimigo.' },
+    { c:'padrao', t:'TEXT', nn:true, n:'Padrão de comportamento (patrulha, investida, ataque à distância).' },
+    { c:'descricao', t:'TEXT', nn:true, n:'Como o jogador deve reagir a esse padrão.' }
   ],
   difficulties: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna da dificuldade.' },
-    { c:'nome', t:'TEXT', nn:true, un:true, api:true, n:'Nome da dificuldade (História, Normal, Desafio).' },
-    { c:'descricao', t:'TEXT', nn:true, api:true, n:'O que muda nesse nível de dificuldade.' }
+    { c:'nome', t:'TEXT', nn:true, un:true, n:'Nome da dificuldade (História, Normal, Desafio).' },
+    { c:'descricao', t:'TEXT', nn:true, n:'O que muda nesse nível de dificuldade.' }
   ],
   controls: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna da ação.' },
-    { c:'acao', t:'TEXT', nn:true, un:true, api:true, n:'Nome da ação do jogador.' },
-    { c:'teclado', t:'TEXT', nn:true, api:true, n:'Tecla correspondente no teclado.' },
-    { c:'controle', t:'TEXT', nn:true, api:true, n:'Botão correspondente no gamepad.' },
-    { c:'ordem', t:'INTEGER', nn:true, def:'0', api:true, n:'Ordem de exibição do controle no jogo.' }
+    { c:'acao', t:'TEXT', nn:true, un:true, n:'Nome da ação do jogador.' },
+    { c:'teclado', t:'TEXT', nn:true, n:'Tecla correspondente no teclado.' },
+    { c:'controle', t:'TEXT', nn:true, n:'Botão correspondente no gamepad.' },
+    { c:'ordem', t:'INTEGER', nn:true, def:'0', n:'Ordem de exibição do controle no jogo.' }
   ],
   checkpoints: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna do checkpoint.' },
-    { c:'tipo', t:'TEXT', nn:true, chk:"IN ('capitulo','fogueira')", api:true, n:'Início de capítulo ou fogueira (ponto de reinício).' },
-    { c:'descricao', t:'TEXT', nn:true, api:true, n:'Onde o checkpoint fica e o que acontece ao ativá-lo.' },
-    { c:'capitulo_id', t:'INTEGER', fk:'chapters(id)', api:true, n:'Capítulo ao qual o checkpoint pertence.' }
+    { c:'tipo', t:'TEXT', nn:true, chk:"IN ('capitulo','fogueira')", n:'Início de capítulo ou fogueira (ponto de reinício).' },
+    { c:'descricao', t:'TEXT', nn:true, n:'Onde o checkpoint fica e o que acontece ao ativá-lo.' },
+    { c:'capitulo_id', t:'INTEGER', fk:'chapters(id)', n:'Capítulo ao qual o checkpoint pertence.' }
   ],
   memories: [
     { c:'id', t:'SERIAL', pk:true, api:false, n:'Chave interna da memória.' },
-    { c:'nome', t:'TEXT', nn:true, un:true, api:true, n:'Nome da memória/flashback.' },
-    { c:'descricao', t:'TEXT', nn:true, api:true, n:'O que o flashback revela da história.' },
-    { c:'capitulo_id', t:'INTEGER', fk:'chapters(id)', api:true, n:'Capítulo em que a memória é encontrada.' }
+    { c:'nome', t:'TEXT', nn:true, un:true, n:'Nome da memória/flashback.' },
+    { c:'descricao', t:'TEXT', nn:true, n:'O que o flashback revela da história.' },
+    { c:'capitulo_id', t:'INTEGER', fk:'chapters(id)', n:'Capítulo em que a memória é encontrada.' }
   ]
 };
 
-/* SQL (DDL) de cada tabela, para consulta rápida */
+/* SQL (DDL) de cada tabela */
 const DDL = {
   game_config: "CREATE TABLE game_config (\n  chave  TEXT PRIMARY KEY,\n  valor  TEXT NOT NULL\n);",
   chapters: "CREATE TABLE chapters (\n  id             SERIAL PRIMARY KEY,\n  numero         INTEGER NOT NULL UNIQUE CHECK (numero BETWEEN 1 AND 5),\n  titulo         TEXT NOT NULL,\n  sinopse        TEXT NOT NULL,\n  mecanica_nova  TEXT NOT NULL\n);",
   characters: "CREATE TABLE characters (\n  id          SERIAL PRIMARY KEY,\n  nome        TEXT NOT NULL UNIQUE,\n  papel       TEXT NOT NULL,\n  descricao   TEXT NOT NULL\n);",
-  mechanics: "CREATE TABLE mechanics (\n  id                  SERIAL PRIMARY KEY,\n  categoria           TEXT NOT NULL CHECK (categoria IN ('movimento','combate','recurso')),\n  nome                TEXT NOT NULL UNIQUE,\n  descricao           TEXT NOT NULL,\n  desbloqueio_capitulo INTEGER REFERENCES chapters(numero)\n);",
+  mechanics: "CREATE TABLE mechanics (\n  id                   SERIAL PRIMARY KEY,\n  categoria            TEXT NOT NULL CHECK (categoria IN ('movimento','combate','recurso')),\n  nome                 TEXT NOT NULL UNIQUE,\n  descricao            TEXT NOT NULL,\n  desbloqueio_capitulo INTEGER REFERENCES chapters(numero)\n);",
   enemies: "CREATE TABLE enemies (\n  id        SERIAL PRIMARY KEY,\n  nome      TEXT NOT NULL UNIQUE,\n  padrao    TEXT NOT NULL,\n  descricao TEXT NOT NULL\n);",
   difficulties: "CREATE TABLE difficulties (\n  id        SERIAL PRIMARY KEY,\n  nome      TEXT NOT NULL UNIQUE,\n  descricao TEXT NOT NULL\n);",
   controls: "CREATE TABLE controls (\n  id        SERIAL PRIMARY KEY,\n  acao      TEXT NOT NULL UNIQUE,\n  teclado   TEXT NOT NULL,\n  controle  TEXT NOT NULL,\n  ordem     INTEGER NOT NULL DEFAULT 0\n);",
@@ -380,9 +414,8 @@ function hl(s) {
   const term = ($('#search').value || '').trim();
   const safe = esc(s);
   if (!term) return safe;
-  try {
-    return safe.replace(new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
-  } catch (e) { return safe; }
+  try { return safe.replace(new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>'); }
+  catch (e) { return safe; }
 }
 function cell(v, kind) {
   if (v === null || v === undefined || v === '') return '<span class="kw">—</span>';
@@ -391,7 +424,7 @@ function cell(v, kind) {
   if (kind === 'code') return '<code>' + hl(v) + '</code>';
   return hl(v);
 }
-function typeClass(t) { return /^INTEGER|SERIAL/.test(t) ? 'int' : 'txt'; }
+const typeClass = (t) => (/^INTEGER|SERIAL/.test(t) ? 'int' : 'txt');
 
 async function loadAll() {
   await Promise.all(allIds().map(async (id) => {
@@ -412,25 +445,22 @@ function render() { renderStats(); renderNav(); renderMain(); applySearch(); }
 
 function renderStats() {
   const ids = allIds();
-  const rows = ids.reduce((n, id) => n + (state.rows[id] || []).length, 0);
-  const fields = ids.reduce((n, id) => n + (FIELDS[id] || []).length, 0);
   $('#st-cats').textContent = CATEGORIES.length;
   $('#st-tables').textContent = ids.length;
-  $('#st-fields').textContent = fields;
-  $('#st-rows').textContent = rows;
+  $('#st-fields').textContent = ids.reduce((n, id) => n + (FIELDS[id] || []).length, 0);
+  $('#st-rows').textContent = ids.reduce((n, id) => n + (state.rows[id] || []).length, 0);
 }
 
 function renderNav() {
   $('#nav').innerHTML = CATEGORIES.map(cat => `
-    <div class="sgroup">
-      <div class="shead">${cat.icon} ${esc(cat.name)}</div>
+    <div class="sgroup" style="--c:${cat.color}">
+      <div class="shead"><span class="dot"></span>${cat.icon} ${esc(cat.name)}</div>
       <div class="stree">
         ${cat.tables.map(id => {
           const n = (state.rows[id] || []).length;
           const err = state.errors[id];
-          const pill = err ? '<span class="pill" style="color:var(--red)">erro</span>'
-                           : `<span class="pill">${n}</span>`;
-          return `<a class="slink" href="#t-${id}" data-target="t-${id}"><span>${id}</span>${pill}</a>`;
+          const pill = err ? '<span class="pill" style="color:var(--red)">erro</span>' : `<span class="pill">${n}</span>`;
+          return `<a class="slink" href="#t-${id}" data-target="t-${id}" style="--c:${cat.color}"><span>${id}</span>${pill}</a>`;
         }).join('')}
       </div>
     </div>`).join('');
@@ -441,12 +471,24 @@ function renderNav() {
   }));
 }
 
+function renderTiles() {
+  return `<div class="tiles">${CATEGORIES.map(cat => {
+    const recs = cat.tables.reduce((n, id) => n + (state.rows[id] || []).length, 0);
+    const flds = cat.tables.reduce((n, id) => n + (FIELDS[id] || []).length, 0);
+    return `<a class="stile" href="#cat-${cat.id}" style="--c:${cat.color}">
+      <span class="tico">${cat.icon}</span>
+      <span class="tn">${esc(cat.name)}</span>
+      <span class="tm"><b>${cat.tables.length}</b> tabelas · <b>${flds}</b> campos · <b>${recs}</b> registros</span>
+    </a>`;
+  }).join('')}</div>`;
+}
+
 function renderMain() {
-  $('#main').innerHTML = CATEGORIES.map(cat => {
+  $('#main').innerHTML = renderTiles() + CATEGORIES.map(cat => {
     const recs = cat.tables.reduce((n, id) => n + (state.rows[id] || []).length, 0);
     const flds = cat.tables.reduce((n, id) => n + (FIELDS[id] || []).length, 0);
     return `
-    <section class="cat" id="cat-${cat.id}">
+    <section class="cat" id="cat-${cat.id}" style="--c:${cat.color}">
       <div class="cathead">
         <div class="catico">${cat.icon}</div>
         <div>
@@ -461,7 +503,7 @@ function renderMain() {
       </div>
       <div class="tgrid">${cat.tables.map(id => tableCard(id)).join('')}</div>
     </section>`;
-  }).join('');
+  }).join('') + legendHTML();
 }
 
 function tableCard(id) {
@@ -470,10 +512,9 @@ function tableCard(id) {
   const cols = Object.keys(def.cols);
   const cat = catOf(id);
 
-  const badges = [
-    `<span class="badge ${err ? 'empty' : (rows.length ? '' : 'empty')}">${err ? 'erro' : rows.length + ' registro(s)'}</span>`,
-    `<span class="badge fields">${flds.length} campo(s)</span>`
-  ].join('');
+  const badges =
+    `<span class="badge ${err || !rows.length ? 'empty' : ''}">${err ? 'erro' : rows.length + ' registro(s)'}</span>` +
+    `<span class="badge fields">${flds.length} campo(s)</span>`;
 
   let dataBody;
   if (err) {
@@ -482,8 +523,8 @@ function tableCard(id) {
     dataBody = `<div class="empty">📭 Tabela vazia — será preenchida conforme o roteiro for escrito.</div>`;
   } else {
     dataBody = `<div class="twrap"><table class="data">
-      <thead><tr>${cols.map(c => `<th>${esc(def.cols[c])}</th>`).join('')}</tr></thead>
-      <tbody>${rows.map(r => `<tr>${cols.map(c =>
+      <thead><tr><th class="idx">nº</th>${cols.map(c => `<th>${esc(def.cols[c])}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map((r, i) => `<tr><td class="idx">${i + 1}</td>${cols.map(c =>
         `<td data-v="${esc(String(r[c] ?? ''))}">${cell(r[c], (def.special || {})[c])}</td>`).join('')}</tr>`).join('')}</tbody>
     </table></div>`;
   }
@@ -511,7 +552,7 @@ function tableCard(id) {
   <article class="tcard" id="t-${id}">
     <div class="tchead">
       <div>
-        <div class="crumb">sandman-db › ${cat.icon} ${esc(cat.id)} › <b>${id}</b></div>
+        <div class="crumb">sandman-db › ${esc(cat.id)} › <b>${id}</b></div>
         <div class="th-title"><span class="tname">${id}</span><span class="ttitle">${esc(def.title)}</span></div>
       </div>
       <div class="tmeta">${badges}<a class="jslink" href="${def.endpoint}" target="_blank">GET ${def.endpoint} ↗</a></div>
@@ -531,37 +572,72 @@ function tableCard(id) {
 
     <details class="sql">
       <summary>🧩 SQL da tabela</summary>
-      <pre>${esc(DDL[id] || '')}</pre>
+      <div class="sqlbody">
+        <button class="copy" data-copy>copiar</button>
+        <pre>${esc(DDL[id] || '')}</pre>
+      </div>
     </details>
   </article>`;
 }
 
-/* ── Busca global (filtra campos e dados) ────── */
+function legendHTML() {
+  const items = [
+    ['🔑', 'PK (Primary Key)', 'Chave primária — identifica unicamente o registro.'],
+    ['🔗', 'FK (Foreign Key)', 'Chave estrangeira — aponta para outra tabela.'],
+    ['✱', 'NOT NULL', 'Campo obrigatório: não aceita valor vazio.'],
+    ['★', 'UNIQUE', 'Valor único: não pode se repetir.'],
+    ['✓', 'CHECK / DEFAULT', 'Regra de validação ou valor padrão.'],
+    ['🔢', 'INTEGER / SERIAL', 'Números inteiros (o SERIAL conta automaticamente).'],
+    ['🔤', 'TEXT', 'Textos livres (títulos, descrições, nomes).'],
+    ['🏷️', 'Chip colorido no dado', 'Valor categorizado (ex.: categoria, tipo, dificuldade).'],
+    ['🔎', 'Barra de busca', 'Filtra campos e dados de todas as tabelas ao mesmo tempo.'],
+    ['👁️', 'só no banco', 'Campo interno, não exposto pela API.']
+  ];
+  return `
+  <section class="legend">
+    <h2>📖 Legenda dos símbolos</h2>
+    <p>Como ler as tabelas, os campos e os dados desta página.</p>
+    <div class="lgrid">
+      ${items.map(([i, t, d]) => `<div class="litem"><span class="li">${i}</span><span class="lt">${esc(t)}<span class="ld">${esc(d)}</span></span></div>`).join('')}
+    </div>
+  </section>`;
+}
+
+/* ── Busca global ────────────────────────────── */
 function applySearch() {
   const term = ($('#search').value || '').trim().toLowerCase();
   let hits = 0, tablesHit = 0;
 
   document.querySelectorAll('.tcard').forEach(card => {
     let inTable = 0;
-
     card.querySelectorAll('table.data tbody tr').forEach(tr => {
       const match = !term || Array.from(tr.querySelectorAll('td'))
         .some(td => (td.dataset.v || '').toLowerCase().includes(term));
       tr.style.display = match ? '' : 'none';
       if (match) inTable++;
     });
-
     card.querySelectorAll('table.fields tbody tr').forEach(tr => {
       const match = !term || (tr.dataset.v || '').includes(term);
       tr.style.display = match ? '' : 'none';
     });
-
     if (term && inTable > 0) { hits += inTable; tablesHit++; card.classList.add('found'); }
     else card.classList.remove('found');
   });
 
   $('#searchInfo').textContent = term ? `${hits} registro(s) em ${tablesHit} tabela(s)` : '';
 }
+
+/* ── Copiar SQL ──────────────────────────────── */
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest && e.target.closest('[data-copy]');
+  if (!b) return;
+  const pre = b.parentElement.querySelector('pre');
+  try {
+    await navigator.clipboard.writeText(pre.textContent);
+    b.textContent = 'copiado ✓';
+  } catch (err) { b.textContent = 'ctrl+C'; }
+  setTimeout(() => { b.textContent = 'copiar'; }, 1600);
+});
 
 /* ── Scrollspy ───────────────────────────────── */
 function spy() {
@@ -583,13 +659,6 @@ $('#refresh').addEventListener('click', async (e) => {
 window.addEventListener('scroll', spy, { passive: true });
 
 loadAll();
-
-/* ── PWA: Service Worker (cache offline do app) ── */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
-}
 </script>
 </body>
 </html>
