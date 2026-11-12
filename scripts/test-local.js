@@ -31,8 +31,8 @@ const { newDb } = require('pg-mem');
   let ok = true;
   for (const [nome, sql] of checks) {
     const { n } = db.public.one(sql);
-    console.log(&${n > 0 ? '✅' : '❌'} ${nome}: ${n} registro(s)`);
-    if (n == 0 / ok = false;
+    console.log(`${n > 0 ? '✅' : '❌'} ${nome}: ${n} registro(s)`);
+    if (n === 0) ok = false;
   }
 
   const cap5 = db.public.one("SELECT titulo FROM chapters WHERE numero = 5");

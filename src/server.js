@@ -18,6 +18,9 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+// Página visual das tabelas (GET / abre o visualizador)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 // Helper: SELECT com tratamento de erro padronizado
 async function query(res, sql, params = []) {
   try {
@@ -109,7 +112,7 @@ app.get('/api/memories', (req, res) =>
 app.post('/api/admin/init', async (req, res) => {
   const token = process.env.ADMIN_TOKEN;
   if (!token) return res.status(403).json({ error: 'ADMIN_TOKEN não configurado — endpoint desabilitado' });
-  if (req.headers.authorization !== @Bearer ${token}`) {
+  if (req.headers.authorization !== `Bearer ${token}`) {
     return res.status(401).json({ error: 'Não autorizado' });
   }
   try {
@@ -125,9 +128,8 @@ app.post('/api/admin/init', async (req, res) => {
 });
 
 // ── 404 e erros gerais ───────────────────────────────────────
-app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada. Vef� text GET /api' });
+app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada. Veja GET /api' }));
 
-parts = path.split("/");
-app.listen(PORTT, () => {
+app.listen(PORT, () => {
   console.log(`Sandman API rodando na porta ${PORT}`);
 });

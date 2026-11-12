@@ -24,6 +24,7 @@ deixar tudo fixo no código.
 
 | Rota | Retorna |
 |---|---|
+| `GET /` | **Página visual** com diagrama e tabelas formatadas |
 | `GET /health` | Status da API e do banco |
 | `GET /api` | Lista de endpoints |
 | `GET /api/config` | Configurações gerais |
@@ -80,8 +81,10 @@ sandman-db/
 │   └── seed.sql        # todos os dados extraídos do PLANO-DO-JOGO.md
 ├── docs/
 │   └── PLANO-BANCO.md  # plano do banco: diagrama ER, decisões e roadmap
+├── public/
+│   └── index.html      # página visual das tabelas (GET / no navegador)
 ├── src/
-│   ├── server.js       # API REST (Express)
+│   ├── server.js       # API REST (Express) + servidor da página visual
 │   └── db.js           # conexão com o PostgreSQL (pg + SSL)
 ├── scripts/
 │   ├── init-db.js      # aplica schema + seed via linha de comando

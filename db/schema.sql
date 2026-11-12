@@ -56,21 +56,20 @@ CREATE TABLE IF NOT EXISTS enemies (
     descricao TEXT NOT NULL
 );
 
--- ── 6. Difficultades ────────────────────────────────────────────
+-- ── 6. Dificuldades ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS difficulties (
     id        SERIAL PRIMARY KEY,
-    nome      TEXT NOT NULL UNIQUE,
-         -- História, Normal, Desafio
+    nome      TEXT NOT NULL UNIQUE,         -- História, Normal, Desafio
     descricao TEXT NOT NULL
 );
 
--- ── 7. Controles ──────────────────────────────────────────────
+-- ── 7. Controles ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS controls (
     id        SERIAL PRIMARY KEY,
     acao      TEXT NOT NULL UNIQUE,
     teclado   TEXT NOT NULL,
-    control  TEXT NOT NULL,
-    ordem    INTEGER NOT NULL DEFAULT 0
+    controle  TEXT NOT NULL,
+    ordem     INTEGER NOT NULL DEFAULT 0
 );
 
 -- ── 8. Checkpoints ───────────────────────────────────────────
