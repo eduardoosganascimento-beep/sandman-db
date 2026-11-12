@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandman DB — Cadastro, Edição e Exclusão (CRUD)</title>
+<meta name="theme-color" content="#0e0c0a">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png">
+<style>
+  :root {
+    --bg:#0e0c0a; --panel:#16130f; --card:#1a1713; --card2:#211d18;
+    --line:#2f2820; --line2:#3b332a; --txt:#ece5db; --dim:#a5988a;
+    --accent:#e6a84f; --green:#7fb069; --blue:#7ec8e3; --red:#e07a5f; --radius:12px;
+    --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--txt); font-family:'Segoe UI',system-ui,sans-serif; line-height:1.55; }
+  a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+  code { font-family:var(--mono); }
+  .top { border-bottom:1px solid var(--line); background:radial-gradient(1000px 240px at 15% -40%,#241d15,transparent),#12100e; }
+  .top-in { max-width:1100px; margin:0 auto; padding:20px 22px 16px; }
+  h1 { font-size:22px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  h1 .brand { color:var(--accent); }
+  h1 .tag { font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#17130f; background:var(--accent); padding:3px 9px; border-radius:20px; }
+  .sub { color:var(--dim); font-size:13.5px; margin-top:5px; }
+  .links { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .links a { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:7px 13px; border-radius:8px; font-size:13px; }
+  .links a:hover { border-color:var(--accent); text-decoration:none; }
+  .links a.primary { background:var(--accent); border-color:var(--accent); color:#17130f; font-weight:600; }
+  .wrap { max-width:1100px; margin:0 auto; padding:20px 22px 40px; }
+  .tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .tab { background:var(--card); border:1px solid var(--line); color:var(--txt); padding:10px 16px; border-radius:10px; cursor:pointer; font-size:14px; min-height:44px; flex:1 1 auto; text-align:center; font-family:inherit; }
+  .tab:hover { border-color:var(--accent); }
+  .tab.active { background:var(--accent); color:#17130f; font-weight:700; border-color:var(--accent); }
+  .grid { display:grid; grid-template-columns:1fr; gap:18px; }
+  @media (min-width:900px) { .grid { grid-template-columns:400px 1fr; align-items:start; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .chead { display:flex; align-items:center; gap:12px; padding:13px 16px; background:linear-gradient(180deg,#251f19,#1f1a15); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .chead h2 { font-size:16px; }
+  .chead .hint { margin-left:auto; font-size:11.5px; color:var(--dim); }
+  .cbody { padding:16px; }
+  .field { display:flex; flex-direction:column; gap:6px; margin-bottom:13px; }
+  .field span { font-size:12px; color:var(--dim); }
+  .field input, .field select, .field textarea {
+    background:#141110; border:1px solid var(--line2); color:var(--txt); border-radius:9px;
+    padding:11px 12px; font-size:15px; width:100%; min-height:44px; font-family:inherit;
+  }
+  .field textarea { resize:vertical; min-height:96px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:var(--accent); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .btn { background:var(--card2); border:1px solid var(--line2); color:var(--txt); padding:10px 16px; border-radius:9px; cursor:pointer; font-size:14px; min-height:44px; font-family:inherit; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn:disabled { opacity:.55; cursor:wait; }
+  .btn-primary { background:var(--accent); border-color:var(--accent); color:#17130f; font-weight:700; }
+  .btn-danger { color:var(--red); }
+  .btn-danger:hover { background:var(--red); color:#fff; border-color:var(--red); }
+  .btn-sm { padding:7px 11px; min-height:38px; font-size:13px; }
+  .status { font-size:13.5px; }
+  .status.ok { color:var(--green); } .status.err { color:var(--red); }
+  .search { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .search input { flex:1 1 220px; background:#141110; border:1px solid var(--line2); color:var(--txt); border-radius:9px; padding:11px 13px; font-size:14px; min-height:44px; }
+  .search input:focus { outline:none; border-color:var(--accent); }
+  .list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .item { border:1px solid var(--line); border-radius:9px; padding:12px; background:#141110; display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
+  .item .main { flex:1 1 200px; min-width:0; }
+  .item .main strong { display:block; font-size:15px; }
+  .item .main .meta { color:var(--accent); font-size:12px; margin-top:3px; }
+  .item .main p { color:var(--dim); font-size:13px; margin-top:6px; overflow-wrap:anywhere; }
+  .item .acts { display:flex; gap:8px; }
+  .empty, .err { color:var(--dim); font-style:italic; font-size:13.5px; }
+  .err { color:var(--red); }
+  .foot { border-top:1px solid var(--line); margin-top:10px; padding:18px 22px 32px; text-align:center; color:var(--dim); font-size:12.5px; }
+  .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--card2); border:1px solid var(--accent); color:var(--txt); padding:12px 18px; border-radius:9px; font-size:14px; z-index:50; max-width:90vw; text-align:center; box-shadow:0 6px 24px rgba(0,0,0,.55); }
+  .toast.err { border-color:var(--red); }
+  @media (max-width:520px) { h1 { font-size:19px; } .tab { font-size:13px; } }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-in">
+    <h1>✍️ <span class="brand">Sandman</span> — Cadastro &amp; Edição <span class="tag">CRUD</span></h1>
+    <div class="sub">Crie, edite, busque e exclua registros do banco — <code>memories</code> e <code>characters</code>.</div>
+    <div class="links">
+      <a class="primary" href="/">🏠 Visualizar as tabelas</a>
+      <a href="/api" target="_blank">🔌 API (JSON)</a>
+      <a href="/health" target="_blank">💓 Health</a>
+      <button class="btn btn-sm" id="installBtn" hidden style="margin-left:auto">📲 Instalar app</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="memories">📝 Memórias (flashbacks)</button>
+    <button class="tab" data-tab="characters">👤 Personagens</button>
+    <button class="tab" data-tab="consulta">🔎 Consulta com busca</button>
+  </div>
+
+  <!-- ═══ MEMÓRIAS + PERSONAGENS (CRUD) ═══ -->
+  <div class="grid" id="crudArea">
+    <div class="card">
+      <div class="chead"><h2 id="formTitle">Novo registro</h2><span class="hint" id="formEntity"></span></div>
+      <div class="cbody">
+        <form id="crudForm" autocomplete="off">
+          <label class="field"><span>nome *</span><input name="nome" required maxlength="120"></label>
+          <label class="field" id="fPapel"><span>papel *</span><input name="papel" maxlength="120"></label>
+          <label class="field"><span>descricao *</span><textarea name="descricao" rows="4" required maxlength="2000"></textarea></label>
+          <label class="field" id="fCap"><span>capítulo (FK → chapters)</span>
+            <select name="capitulo_id"><option value="">— sem capítulo —</option></select>
+          </label>
+          <div class="row">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Cadastrar</button>
+            <button type="button" class="btn" id="cancelBtn" hidden>Cancelar edição</button>
+            <span class="status" id="formStatus"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead"><h2>Registros</h2><span class="hint" id="listEntity"></span></div>
+      <div class="cbody">
+        <div class="search">
+          <input id="listSearch" type="search" placeholder="Buscar por nome ou descrição…" autocomplete="off">
+          <button class="btn btn-sm" id="listRefresh">↻ Atualizar</button>
+        </div>
+        <ul class="list" id="recordList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONSULTA ═══ -->
+  <div id="consultaArea" hidden>
+    <div class="card">
+      <div class="chead"><h2>Consulta (leitura)</h2><span class="hint">GET /api/…</span></div>
+      <div class="cbody">
+        <div class="search">
+          <select id="tableSelect" style="flex:1 1 220px; background:#141110; border:1px solid var(--line2); color:var(--txt); border-radius:9px; padding:11px 12px; min-height:44px; font-size:14px;">
+            <option value="characters">characters — personagens</option>
+            <option value="memories">memories — memórias</option>
+            <option value="chapters">chapters — capítulos</option>
+            <option value="mechanics">mechanics — mecânicas</option>
+            <option value="enemies">enemies — inimigos</option>
+            <option value="difficulties">difficulties — dificuldades</option>
+            <option value="controls">controls — controles</option>
+            <option value="checkpoints">checkpoints — checkpoints</option>
+            <option value="config">game_config — configurações</option>
+          </select>
+          <input id="searchInput" type="search" placeholder="Filtrar (characters e memories)…">
+          <button class="btn btn-sm" id="searchBtn">Consultar</button>
+        </div>
+        <div class="sub" id="resultInfo"></div>
+        <div style="overflow-x:auto; border:1px solid var(--line); border-radius:9px; margin-top:10px;">
+          <table id="resultTable" style="border-collapse:collapse; width:100%; font-size:13.5px; min-width:460px;">
+            <thead></thead><tbody></tbody>
+          </table>
+        </div>
+        <p class="empty" id="emptyHint" hidden></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">
+  Projeto <b>Sandman</b> · API CRUD + PWA ·
+  <a href="https://github.com/eduardoosganascimento-beep/sandman-db" target="_blank">github.com/eduardoosganascimento-beep/sandman-db</a>
+  <div id="swInfo" style="margin-top:6px;opacity:.8"></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const ENTITIES = {
+    memories:     { label:'memories',     title:'Memórias (flashbacks)', hasChapter:true,  hasPapel:false, list:'/api/memories',     fields:['nome','descricao'] },
+    characters:   { label:'characters',   title:'Personagens',           hasChapter:false, hasPapel:true,  list:'/api/characters',   fields:['nome','papel','descricao'] },
+  };
+  const READ = {
+    characters:'/api/characters', memories:'/api/memories', chapters:'/api/chapters',
+    mechanics:'/api/mechanics', enemies:'/api/enemies', difficulties:'/api/difficulties',
+    controls:'/api/controls', checkpoints:'/api/checkpoints', config:'/api/config',
+  };
+  let entity = 'memories', editingId = null, chaptersLoaded = false;
+
+  /* ── util ── */
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let tTimer;
+  function toast(msg, bad) {
+    const el = $('#toast'); el.textContent = msg; el.classList.toggle('err', !!bad); el.hidden = false;
+    clearTimeout(tTimer); tTimer = setTimeout(() => el.hidden = true, 3200);
+  }
+  function status(msg, ok) {
+    const el = $('#formStatus'); el.textContent = msg || ''; el.className = 'status ' + (ok === false ? 'err' : 'ok');
+  }
+  const cur = () => ENTITIES[entity];
+
+  /* ── abas ── */
+  $$('.tab').forEach(tab => tab.addEventListener('click', () => {
+    $$('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const isCrud = tab.dataset.tab !== 'consulta';
+    $('#crudArea').hidden = !isCrud;
+    $('#consultaArea').hidden = isCrud;
+    if (tab.dataset.tab === 'consulta') runSearch(); else loadList();
+  }));
+
+  /* ── capítulos (FK) ── */
+  async function loadChapters() {
+    if (chaptersLoaded) return;
+    try {
+      const rows = await (await fetch('/api/chapters')).json();
+      const sel = $('#crudForm [name="capitulo_id"]');
+      sel.innerHTML = '<option value="">— sem capítulo —</option>' +
+        rows.map(c => `<option value="${c.id}">cap. ${c.numero} — ${esc(c.titulo)}</option>`).join('');
+      chaptersLoaded = true;
+    } catch (e) { console.warn('capítulos:', e); }
+  }
+
+  /* ── lista + busca ── */
+  async function loadList() {
+    const ent = cur(), ul = $('#recordList');
+    ul.innerHTML = '<li class="empty">Carregando…</li>';
+    try {
+      const q = $('#listSearch').value.trim();
+      const url = ent.list + (q ? `?q=${encodeURIComponent(q)}` : '');
+      const rows = await (await fetch(url)).json();
+      $('#listEntity').textContent = `${ent.label} · ${rows.length} registro(s)` + (q ? ` · filtro "${q}"` : '');
+      if (!rows.length) { ul.innerHTML = '<li class="empty">Nenhum registro encontrado.</li>'; return; }
+      ul.innerHTML = rows.map(r => `
+        <li class="item">
+          <div class="main">
+            <strong>${esc(r.nome)}</strong>
+            ${ent.hasPapel && r.papel ? `<div class="meta">${esc(r.papel)}</div>` : ''}
+            <p>${esc(r.descricao || '')}</p>
+            ${r.capitulo != null ? `<div class="meta">capítulo ${r.capitulo}</div>` : ''}
+          </div>
+          <div class="acts">
+            <button class="btn btn-sm js-edit" data-row="${esc(JSON.stringify(r))}">✏️ Editar</button>
+            <button class="btn btn-sm btn-danger js-del" data-id="${r.id}">🗑️ Excluir</button>
+          </div>
+        </li>`).join('');
+      $$('.js-edit', ul).forEach(b => b.addEventListener('click', () => startEdit(b.dataset.row)));
+      $$('.js-del', ul).forEach(b => b.addEventListener('click', () => removeRecord(b.dataset.id)));
+    } catch (e) { ul.innerHTML = `<li class="err">Falha ao carregar: ${esc(e.message)}</li>`; }
+  }
+
+  /* ── formulário ── */
+  function switchEntity(e) {
+    entity = e;
+    const ent = cur();
+    $('#fPapel').hidden = !ent.hasPapel;
+    $('#fCap').hidden = !ent.hasChapter;
+    $('#listEntity').textContent = ent.label;
+    $('#formEntity').textContent = ent.label;
+    resetForm();
+    if (ent.hasChapter) loadChapters();
+    loadList();
+  }
+  function resetForm() {
+    editingId = null;
+    $('#crudForm').reset();
+    $('#formTitle').textContent = 'Novo registro';
+    $('#submitBtn').textContent = 'Cadastrar';
+    $('#cancelBtn').hidden = true;
+    status('');
+  }
+  function startEdit(json) {
+    const ent = cur(), row = JSON.parse(json);
+    editingId = row.id;
+    const f = $('#crudForm');
+    f.nome.value = row.nome || '';
+    f.descricao.value = row.descricao || '';
+    if (ent.hasPapel) f.papel.value = row.papel || '';
+    if (ent.hasChapter) f.capitulo_id.value = row.capitulo_id ?? '';
+    $('#formTitle').textContent = `Editando #${row.id}`;
+    $('#submitBtn').textContent = 'Salvar alterações';
+    $('#cancelBtn').hidden = false;
+    status('Editando registro…');
+    f.scrollIntoView({ behavior:'smooth', block:'center' });
+    f.nome.focus();
+  }
+  async function removeRecord(id) {
+    const ent = cur();
+    if (!confirm(`Excluir o registro #${id} de "${ent.label}"? Essa ação não pode ser desfeita.`)) return;
+    try {
+      const r = await fetch(`${ent.list}/${id}`, { method:'DELETE' });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      toast(`Registro #${id} excluído.`);
+      if (editingId === id) resetForm();
+      loadList();
+    } catch (e) { toast('Erro ao excluir: ' + e.message, true); }
+  }
+
+  $('#crudForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ent = cur(), f = e.target;
+    const payload = { nome:f.nome.value.trim(), descricao:f.descricao.value.trim() };
+    if (ent.hasPapel) payload.papel = f.papel.value.trim();
+    if (ent.hasChapter) payload.capitulo_id = f.capitulo_id.value || null;
+    for (const k of ent.fields) if (!payload[k]) { status(`O campo "${k}" é obrigatório.`, false); return; }
+    const btn = $('#submitBtn'); btn.disabled = true;
+    try {
+      const url = editingId ? `${ent.list}/${editingId}` : ent.list;
+      const r = await fetch(url, {
+        method: editingId ? 'PUT' : 'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      status(editingId ? 'Alterações salvas ✓' : 'Cadastrado com sucesso ✓');
+      toast(editingId ? 'Registro atualizado.' : 'Registro cadastrado.');
+      resetForm(); loadList();
+    } catch (err) { status(err.message, false); toast(err.message, true); }
+    finally { btn.disabled = false; }
+  });
+  $('#cancelBtn').addEventListener('click', resetForm);
+  $('#listRefresh').addEventListener('click', loadList);
+  $('#listSearch').addEventListener('input', loadList);
+  $('#listSearch').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadList(); } });
+
+  /* ── consulta ── */
+  async function runSearch() {
+    const table = $('#tableSelect').value, q = $('#searchInput').value.trim();
+    $('#resultInfo').textContent = 'Carregando…';
+    try {
+      let url = READ[table];
+      if (q && (table === 'characters' || table === 'memories')) url += `?q=${encodeURIComponent(q)}`;
+      const rows = await (await fetch(url)).json();
+      const th = $('#resultTable thead'), tb = $('#resultTable tbody');
+      th.innerHTML = ''; tb.innerHTML = ''; $('#emptyHint').hidden = true;
+      if (!Array.isArray(rows) || !rows.length) {
+        $('#resultInfo').textContent = `${table}: 0 registro(s)`;
+        $('#emptyHint').hidden = false;
+        $('#emptyHint').textContent = q ? `Nenhum registro corresponde a "${q}".` : 'Nenhum registro nesta tabela.';
+        return;
+      }
+      const cols = Object.keys(rows[0]);
+      th.innerHTML = `<tr>${cols.map(c => `<th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--accent);font-size:12px;">${esc(c)}</th>`).join('')}</tr>`;
+      tb.innerHTML = rows.map(r => `<tr>${cols.map(c => {
+        const v = r[c];
+        return `<td style="padding:8px 12px;border-bottom:1px solid #27211c;vertical-align:top;${v === null ? 'color:var(--dim);font-style:italic;' : ''}">${v === null ? 'NULL' : esc(String(v))}</td>`;
+      }).join('')}</tr>`).join('');
+      $('#resultInfo').textContent = `${table}: ${rows.length} registro(s)` + (q ? ` · filtro "${q}"` : '');
+    } catch (e) {
+      $('#resultInfo').textContent = '';
+      $('#emptyHint').hidden = false;
+      $('#emptyHint').textContent = 'Falha ao consultar: ' + e.message;
+    }
+  }
+  $('#searchBtn').addEventListener('click', runSearch);
+  $('#searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } });
+  $('#tableSelect').addEventListener('change', () => {
+    const t = $('#tableSelect').value;
+    const ok = t === 'characters' || t === 'memories';
+    $('#searchInput').disabled = !ok;
+    $('#searchInput').placeholder = ok ? 'Filtrar…' : 'Busca disponível p/ characters e memories';
+    runSearch();
+  });
+
+  /* ── PWA ── */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => { $('#swInfo').textContent = reg.active ? 'Service Worker ativo — funciona offline.' : 'Service Worker instalado.'; })
+      .catch(err => { $('#swInfo').textContent = 'Service Worker: ' + err.message; });
+  }
+  let dp = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); dp = e; $('#installBtn').hidden = false; });
+  $('#installBtn').addEventListener('click', async () => {
+    if (!dp) return; dp.prompt(); const { outcome } = await dp.userChoice;
+    toast(outcome === 'accepted' ? 'Instalando Sandman DB…' : 'Instalação cancelada.');
+    dp = null; $('#installBtn').hidden = true;
+  });
+
+  /* ── início ── */
+  switchEntity('memories');
+})();
+</script>
+</body>
+</html>
