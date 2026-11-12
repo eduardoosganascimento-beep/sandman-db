@@ -1,0 +1,29 @@
+# Blueprint do Render — cria o banco PostgreSQL e a API web juntos.
+# No Render: New + → Blueprint → aponte para o repositório sandman-db.
+databases:
+  - name: sandman-db
+    plan: free
+    databaseName: sandman
+    user: sandman
+
+services:
+  - type: web
+    name: sandman-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sandman-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      # Defina um token secreto para habilitar o endpoint de inicialização:
+      - key: ADMIN_TOKEN
+        generateValue: true
+      # Opcional: restringir CORS ao domínio do jogo
+      # - key: CORS_ORIGIN
+      #   value: https://seu-usuario.github.io

@@ -1,0 +1,21 @@
+{
+  "name": "sandman-db",
+  "version": "1.0.0",
+  "description": "Banco de dados e API de conteúdo do jogo Sandman — hospedado no Render",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "db:init": "node scripts/init-db.js",
+    "test": "node scripts/test-local.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "pg-mem": "^3.0.5"
+  }
+}
