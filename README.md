@@ -1,5 +1,18 @@
 # 🗄️ Sandman DB — Banco de Dados do Jogo
 
+## 🔗 Acesse agora
+
+| O que | Link |
+|---|---|
+| 👁️ **Ver as tabelas visualmente** | **https://sandman-api.onrender.com/** |
+| 🔌 API (JSON) | https://sandman-api.onrender.com/api |
+| 📐 Plano do banco (diagrama ER) | [docs/PLANO-BANCO.md](docs/PLANO-BANCO.md) |
+| 💻 Código-fonte | https://github.com/eduardoosganascimento-beep/sandman-db |
+
+> A página visual mostra o diagrama das 9 tabelas e os dados de cada uma.
+> O plano gratuito do Render "dorme" após alguns minutos sem acesso — o
+> primeiro carregamento pode levar até ~50 segundos.
+
 Banco de dados **PostgreSQL** + **API REST** com todo o conteúdo do jogo
 **Sandman** (do `PLANO-DO-JOGO.md`), hospedado no **Render**.
 

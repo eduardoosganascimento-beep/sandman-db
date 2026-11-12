@@ -127,9 +127,39 @@ app.post('/api/admin/init', async (req, res) => {
   }
 });
 
+// ── Inicialização automática do banco ────────────────────────
+// No primeiro boot (ou se o banco estiver vazio), aplica schema + seed.
+// O schema usa CREATE TABLE IF NOT EXISTS e o seed é seguro para rodar
+// de novo, então isso nunca duplica dados.
+async function ensureDatabase() {
+  try {
+    const { rows } = await pool.query(
+      "SELECT to_regclass('public.chapters') IS NOT NULL AS existe"
+    );
+    let precisaSeed = !rows[0].existe;
+    if (!precisaSeed) {
+      const count = await pool.query('SELECT COUNT(*)::int AS n FROM chapters');
+      precisaSeed = count.rows[0].n === 0;
+    }
+    if (!precisaSeed) {
+      console.log('Banco já inicializado.');
+      return;
+    }
+    console.log('Banco vazio — aplicando schema e dados do jogo...');
+    const schema = fs.readFileSync(path.join(__dirname, '..', 'db', 'schema.sql'), 'utf8');
+    const seed = fs.readFileSync(path.join(__dirname, '..', 'db', 'seed.sql'), 'utf8');
+    await pool.query(schema);
+    await pool.query(seed);
+    console.log('✅ Banco inicializado automaticamente.');
+  } catch (err) {
+    console.error('Falha na inicialização automática do banco:', err.message);
+  }
+}
+
 // ── 404 e erros gerais ───────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: 'Rota não encontrada. Veja GET /api' }));
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Sandman API rodando na porta ${PORT}`);
+  await ensureDatabase();
 });
